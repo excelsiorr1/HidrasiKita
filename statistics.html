@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HidrasiKita - Statistik 💧</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --background: #CAF0F8;
+            --text: #2A5265;
+            --primary: #00B4D8;
+            --secondary: #90E0EF;
+            --card-bg: white;
+            --accent: #e63946;
+        }
+
+        .dark-mode {
+            --background: #1a2a3a;
+            --text: #CAF0F8;
+            --primary: #48BFE3;
+            --secondary: #2A5265;
+            --card-bg: #2A5265;
+            --accent: #ff6b6b;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--background);
+            color: var(--text);
+            transition: all 0.3s;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        .celtic-logo {
+            width: 80px;
+            display: block;
+            margin: 0 auto 20px;
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+
+        .stats-card {
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stats-card h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .stats-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 20px 0;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: var(--secondary);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .range-selector {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .range-btn {
+            background: var(--secondary);
+            color: var(--text);
+            border: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+
+        .range-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dark-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th,
+        table td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .pattern-indicator {
+            height: 10px;
+            width: 100%;
+            background: linear-gradient(to right, var(--accent), var(--primary));
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .insight-box {
+            background-color: rgba(0, 180, 216, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .recommendations {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(0, 180, 216, 0.1);
+            border-radius: 8px;
+        }
+
+        .recommendations h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .recommendations ul {
+            padding-left: 20px;
+        }
+
+        .recommendations li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <svg class="celtic-logo" viewBox="0 0 100 100">
+        <path d="M50 15 C20 15,15 50,50 85 C85 85,85 50,50 15" 
+              fill="none" stroke="var(--primary)" stroke-width="4"/>
+        <path d="M50 30 Q55 35,60 40 Q50 60,40 40 Q45 35,50 30" 
+              fill="var(--secondary)"/>
+    </svg>
+
+    <button onclick="toggleDarkMode()" class="dark-toggle">
+        <span id="darkModeIcon">🌓</span>
+    </button>
+
+    <div class="container">
+        <h1>📊 Statistik Hidrasi</h1>
+
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('summary')">Ringkasan</div>
+            <div class="tab" onclick="switchTab('daily')">Harian</div>
+            <div class="tab" onclick="switchTab('trends')">Tren & Pola</div>
+            <div class="tab" onclick="switchTab('insights')">Wawasan</div>
+        </div>
+
+        <!-- Tab 1: Summary -->
+        <div id="summary" class="tab-content active">
+            <div class="stat-grid">
+                <div class="stats-card">
+                    <div>
+                        <h3>Rata-rata Harian</h3>
+                        <div class="value">1850 ml</div>
+                    </div>
+                    <div style="font-size: 24px;">📈</div>
+                </div>
+                <div class="stats-card">
+                    <div>
+                        <h3>Streak Terbaik</h3>
+                        <div class="value">7 hari</div>
+                    </div>
+                    <div style="font-size: 24px;">🔥</div>
+                </div>
+                <div class="stats-card">
+                    <div>
+                        <h3>Kepatuhan Target</h3>
+                        <div class="value">85%</div>
+                    </div>
+                    <div style="font-size: 24px;">🎯</div>
+                </div>
+                <div class="stats-card">
+                    <div>
+                        <h3>Total Bulan Ini</h3>
+                        <div class="value">40.5 L</div>
+                    </div>
+                    <div style="font-size: 24px;">💧</div>
+                </div>
+            </div>
+
+            <div class="range-selector">
+                <button class="range-btn" onclick="updateRange('week')">7 Hari</button>
+                <button class="range-btn active" onclick="updateRange('month')">30 Hari</button>
+                <button class="range-btn" onclick="updateRange('year')">12 Bulan</button>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="summaryChart"></canvas>
+            </div>
+
+            <div class="text-center">
+                <h3>Detail Waktu Minum</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="timeDistributionChart"></canvas>
+            </div>
+
+            <div class="recommendations">
+                <h3>Rekomendasi Untuk Anda</h3>
+                <ul>
+                    <li>Berdasarkan pola Anda, cobalah meningkatkan konsumsi pagi hari (sebelum jam 10)</li>
+                    <li>Anda hampir mencapai streak 10 hari! Tetap konsisten untuk 3 hari ke depan</li>
+                    <li>Target 2000ml Anda sesuai dengan kebutuhan tubuh. Pertahankan!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tab 2: Daily View -->
+        <div id="daily" class="tab-content">
+            <div class="text-center">
+                <h3>Detail Konsumsi Harian</h3>
+                <input type="date" id="date-selector" onchange="updateDailyView()">
+            </div>
+
+            <div class="stats-card" style="background-color: var(--card-bg); margin: 20px 0;">
+                <div>
+                    <h3 id="selected-date">Senin, 19 Mei 2025</h3>
+                    <div class="value">1950 ml / 2000 ml</div>
+                    <div>Target: <span id="completion-percentage">97.5%</span></div>
+                </div>
+                <div style="font-size: 36px;">🥤</div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="dailyTimelineChart"></canvas>
+            </div>
+
+            <table id="daily-entries">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>08:15</td>
+                        <td>250 ml</td>
+                    </tr>
+                    <tr>
+                        <td>10:30</td>
+                        <td>200 ml</td>
+                    </tr>
+                    <tr>
+                        <td>12:45</td>
+                        <td>500 ml</td>
+                    </tr>
+                    <tr>
+                        <td>15:20</td>
+                        <td>300 ml</td>
+                    </tr>
+                    <tr>
+                        <td>18:00</td>
+                        <td>450 ml</td>
+                    </tr>
+                    <tr>
+                        <td>21:10</td>
+                        <td>250 ml</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tab 3: Trends & Patterns -->
+        <div id="trends" class="tab-content">
+            <div class="text-center">
+                <h3>Pola Mingguan</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="weekdayPatternChart"></canvas>
+            </div>
+
+            <div class="stats-card" style="background-color: var(--card-bg); margin: 20px 0;">
+                <div style="width: 100%;">
+                    <h3>Konsistensi Harian</h3>
+                    <div class="pattern-indicator"></div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span>Rendah</span>
+                        <span>Tinggi</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <h3>Kemajuan Bulanan</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="monthlyProgressChart"></canvas>
+            </div>
+
+            <div class="insight-box">
+                <h4>Analisis Pola</h4>
+                <p>Anda cenderung minum lebih banyak di hari Senin-Rabu, dan menurun di akhir pekan. Cobalah untuk menjaga konsistensi di hari Sabtu dan Minggu.</p>
+            </div>
+        </div>
+
+        <!-- Tab 4: Insights -->
+        <div id="insights" class="tab-content">
+            <div class="stats-card" style="background-color: var(--card-bg); margin: 20px 0;">
+                <div>
+                    <h3>Skor Hidrasi</h3>
+                    <div class="value">85/100</div>
+                    <div>Sangat Baik</div>
+                </div>
+                <div style="font-size: 36px;">🏆</div>
+            </div>
+
+            <div class="insight-box">
+                <h4>Wawasan Utama</h4>
+                <ul>
+                    <li>Anda konsisten mencapai 92% target di hari kerja</li>
+                    <li>Puncak hidrasi Anda biasanya sekitar jam 13:00</li>
+                    <li>Anda sering melewatkan minum di pagi hari (06:00-08:00)</li>
+                </ul>
+            </div>
+
+            <div class="text-center">
+                <h3>Perbandingan dengan Rata-rata Pengguna</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+
+            <div class="insight-box">
+                <h4>Tips Personalisasi</h4>
+                <p>Berdasarkan data Anda, cobalah untuk:</p>
+                <ul>
+                    <li>Menyiapkan air minum di meja kerja sebelum memulai aktivitas pagi</li>
+                    <li>Mengatur pengingat tambahan di jam 07:00 dan 16:00</li>
+                    <li>Menyiapkan botol air berukuran lebih besar (750ml) untuk mengurangi frekuensi isi ulang</li>
+                </ul>
+            </div>
+
+            <div class="text-center">
+                <h3>Proyeksi Kebiasaan</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="projectionChart"></canvas>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button onclick="window.location.href='index.html'" style="background-color: #666;">Beranda</button>
+            <button onclick="window.location.href='settings.html'">Pengaturan</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current date in date picker
+            const today = new Date();
+            document.getElementById('date-selector').valueAsDate = today;
+
+            // Load settings
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeIcon').textContent = '🌞';
+            }
+
+            // Initialize all charts
+            initSummaryChart();
+            initTimeDistributionChart();
+            initDailyTimelineChart();
+            initWeekdayPatternChart();
+            initMonthlyProgressChart();
+            initComparisonChart();
+            initProjectionChart();
+        });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            document.getElementById('darkModeIcon').textContent = isDark ? '🌞' : '🌓';
+            updateAllCharts();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
+
+        function updateRange(range) {
+            document.querySelectorAll('.range-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.range-btn[onclick="updateRange('${range}')"]`).classList.add('active');
+            updateSummaryChart(range);
+        }
+
+        function updateDailyView() {
+            const selectedDate = document.getElementById('date-selector').value;
+            const history = JSON.parse(localStorage.getItem('hidrasiHistory')) || [];
+            const settings = JSON.parse(localStorage.getItem('hidrasiSettings')) || {};
+            const target = settings.dailyTarget || 2000;
+
+            const formattedDate = new Date(selectedDate).toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            document.getElementById('selected-date').textContent = formattedDate;
+
+            const dailyEntries = history.filter(entry => entry.date === new Date(selectedDate).toLocaleDateString('id-ID'));
+            const dailyTotal = dailyEntries.reduce((sum, entry) => sum + entry.amount, 0);
+            document.getElementById('completion-percentage').textContent = `${((dailyTotal / target) * 100).toFixed(1)}%`;
+            document.querySelector('.stats-card .value').textContent = `${dailyTotal} ml / ${target} ml`;
+
+            const tbody = document.getElementById('daily-entries').querySelector('tbody');
+            tbody.innerHTML = dailyEntries.map(entry => `
+                <tr>
+                    <td>${entry.time}</td>
+                    <td>${entry.amount} ml</td>
+                </tr>
+            `).join('');
+            initDailyTimelineChart();
+        }
+
+        function initSummaryChart() {
+            const ctx = document.getElementById('summaryChart').getContext('2d');
+            const history = JSON.parse(localStorage.getItem('hidrasiHistory')) || [];
+            const settings = JSON.parse(localStorage.getItem('hidrasiSettings')) || {};
+            const target = settings.dailyTarget || 2000;
+
+            const today = new Date();
+            const labels = [];
+            const data = [];
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateStr = date.toLocaleDateString('id-ID');
+                labels.push(dateStr);
+                const dailyTotal = history
+                    .filter(entry => entry.date === dateStr)
+                    .reduce((sum, entry) => sum + entry.amount, 0);
+                data.push(dailyTotal);
+            }
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Konsumsi Harian (ml)',
+                            data: data,
+                            borderColor: 'var(--primary)',
+                            backgroundColor: 'rgba(0, 180, 216, 0.2)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Target',
+                            data: Array(labels.length).fill(target),
+                            borderColor: 'var(--accent)',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: Math.min(...data, target) * 0.8,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { color: 'var(--text)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'var(--text)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initTimeDistributionChart() {
+            const ctx = document.getElementById('timeDistributionChart').getContext('2d');
+            const history = JSON.parse(localStorage.getItem('hidrasiHistory')) || [];
+
+            const timeSlots = ['06-08', '08-10', '10-12', '12-14', '14-16', '16-18', '18-20', '20-22'];
+            const data = timeSlots.map(slot => {
+                const [start, end] = slot.split('-').map(h => parseInt(h));
+                return history.reduce((sum, entry) => {
+                    const entryHour = parseInt(entry.time.split(':')[0]);
+                    return entryHour >= start && entryHour < end ? sum + entry.amount : sum;
+                }, 0);
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: timeSlots,
+                    datasets: [{
+                        label: 'Rata-rata Konsumsi (ml)',
+                        data: data,
+                        backgroundColor: 'var(--primary)',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { color: 'var(--text)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'var(--text)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initDailyTimelineChart() {
+            const ctx = document.getElementById('dailyTimelineChart').getContext('2d');
+            const history = JSON.parse(localStorage.getItem('hidrasiHistory')) || [];
+            const selectedDate = document.getElementById('date-selector').value;
+            const dailyEntries = history.filter(entry => entry.date === new Date(selectedDate).toLocaleDateString('id-ID'));
+
+            const labels = dailyEntries.map(entry => entry.time);
+            const data = dailyEntries.map(entry => entry.amount);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Konsumsi (ml)',
+                        data: data,
+                        borderColor: 'var(--primary)',
+                        backgroundColor: 'rgba(0, 180, 216, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { color: 'var(--text)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'var(--text)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initWeekdayPatternChart() {
+            const ctx = document.getElementById('weekdayPatternChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                    datasets: [{
+                        label: 'Rata-rata Konsumsi (ml)',
+                        data: [2100, 1950, 2050, 1800, 1850, 1500, 1600],
+                        borderColor: 'var(--primary)',
+                        backgroundColor: 'rgba(0, 180, 216, 0.3)',
+                        pointBackgroundColor: 'var(--primary)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 1000,
+                            max: 2500,
+                            ticks: { color: 'var(--text)', backdropColor: 'transparent' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { color: 'var(--text)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initMonthlyProgressChart() {
+            const ctx = document.getElementById('monthlyProgressChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei'],
+                    datasets: [{
+                        label: 'Total Konsumsi (L)',
+                        data: [35.2, 38.5, 42.1, 41.5, 40.5],
+                        backgroundColor: 'var(--primary)',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { color: 'var(--text)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'var(--text)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initComparisonChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Konsistensi', 'Pencapaian Target', 'Distribusi Waktu', 'Total Harian'],
+                    datasets: [
+                        {
+                            label: 'Anda',
+                            data: [85, 92, 78, 88],
+                            backgroundColor: 'var(--primary)'
+                        },
+                        {
+                            label: 'Rata-rata Pengguna',
+                            data: [70, 75, 65, 80],
+                            backgroundColor: 'var(--secondary)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { color: 'var(--text)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'var(--text)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initProjectionChart() {
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Minggu Ini', '2 Minggu', '1 Bulan', '2 Bulan', '3 Bulan'],
+                    datasets: [{
+                        label: 'Proyeksi Rata-rata Harian (ml)',
+                        data: [1850, 1900, 1950, 2000, 2100],
+                        borderColor: 'var(--primary)',
+                        backgroundColor: 'rgba(0, 180, 216, 0.2)',
+                        fill: true,
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 1500,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { color: 'var(--text)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'var(--text)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSummaryChart(range) {
+            // TODO: Implement logic to update summary chart based on selected range
+            // This would involve fetching data from localStorage and updating the chart
+        }
+
+        function updateAllCharts() {
+            // TODO: Implement logic to refresh all charts when theme changes
+            // This would involve redrawing all charts to apply new theme colors
+        }
+    </script>
+</body>
+</html>

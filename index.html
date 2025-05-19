@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HidrasiKita 💧</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --background: #CAF0F8;
+            --text: #2A5265;
+            --primary: #00B4D8;
+            --secondary: #90E0EF;
+            --card-bg: white;
+            --accent: #e63946;
+        }
+
+        .dark-mode {
+            --background: #1a2a3a;
+            --text: #CAF0F8;
+            --primary: #48BFE3;
+            --secondary: #2A5265;
+            --card-bg: #2A5265;
+            --accent: #ff6b6b;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--background);
+            color: var(--text);
+            transition: 0.3s all;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { filter: brightness(1.1); }
+
+        input {
+            padding: 8px;
+            width: 100px;
+            border: 2px solid var(--primary);
+            border-radius: 5px;
+            background: var(--card-bg);
+            color: var(--text);
+        }
+
+        .celtic-logo {
+            width: 80px;
+            display: block;
+            margin: 0 auto 20px;
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+
+        #history li {
+            padding: 10px;
+            border-bottom: 1px solid var(--secondary);
+            list-style: none;
+        }
+
+        .music-btn, .dark-toggle {
+            position: fixed;
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .music-btn { bottom: 20px; right: 20px; }
+        .dark-toggle { top: 20px; right: 20px; }
+
+        .footer-credit {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: var(--text);
+            border-top: 2px solid var(--primary);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .knot-icon {
+            width: 24px;
+            vertical-align: middle;
+            margin: 0 5px;
+            filter: drop-shadow(0 0 3px var(--primary));
+        }
+
+        .achievement-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .achievement-gold { background: #FFD700 !important; }
+        .achievement-red { background: #E63946 !important; }
+        .achievement-green { background: #48BF53 !important; }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            input, button {
+                width: 100%;
+                margin: 5px 0;
+            }
+            .celtic-logo {
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <svg class="celtic-logo" viewBox="0 0 100 100">
+        <path d="M50 15 C20 15,15 50,50 85 C85 85,85 50,50 15" 
+              fill="none" stroke="var(--primary)" stroke-width="4"/>
+        <path d="M50 30 Q55 35,60 40 Q50 60,40 40 Q45 35,50 30" 
+              fill="var(--secondary)"/>
+    </svg>
+
+    <button onclick="toggleDarkMode()" class="dark-toggle" aria-label="Toggle dark mode">
+        <span id="darkModeIcon">🌓</span>
+    </button>
+
+    <div class="container">
+        <h1>💧 HidrasiKita</h1>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <input type="number" id="amount" value="200" min="0" aria-label="Jumlah air dalam ml">
+            <button onclick="tambahAir()">Tambahkan</button>
+            <button onclick="kurangiAir()" style="background: var(--accent)">Kurangi</button>
+        </div>
+
+        <h3 style="text-align: center;">Total Hari Ini: <span id="total">0</span> ml / 
+            <input type="number" id="targetInput" value="2000" style="width: 80px;" aria-label="Target harian dalam ml"> ml
+        </h3>
+
+        <div style="margin: 30px 0;">
+            <canvas id="weeklyChart"></canvas>
+        </div>
+
+        <div class="achievement-section">
+            <h3>🏆 Achievement</h3>
+            <div id="dailyStreak" class="badge">🔥 Streak Harian: 0 hari</div>
+            <div id="weeklyTotal" class="badge">📅 Total Mingguan: 0 ml</div>
+            <div id="achievementMessage" style="margin-top: 10px;"></div>
+        </div>
+
+        <div>
+            <h3>⏳ Riwayat Minum</h3>
+            <ul id="history"></ul>
+            <button onclick="clearHistory()" style="background: #666;">Hapus Riwayat</button>
+        </div>
+    </div>
+
+    <div class="music-btn" onclick="toggleMusic()" aria-label="Toggle music">
+        <span id="music-icon">🎵</span>
+    </div>
+
+    <div class="footer-credit">
+        <p>
+            🎵 Dibuat oleh 
+            <img src="celtic-knot.png" 
+                 alt="Celtic Knot" 
+                 class="knot-icon"> 
+            <strong>Excel dan Hasan</strong>
+        </p>
+        <p>Ditemani irama musik Celtic</p>
+        <div class="navigation" style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <button onclick="window.location.href='settings.html'">Pengaturan</button>
+            <button onclick="window.location.href='statistics.html'">Statistik</button>
+        </div>
+    </div>
+
+    <audio id="celtic-bgm" loop>
+        <source src="celtic-music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Inisialisasi variabel yang hilang
+        let history = JSON.parse(localStorage.getItem('hidrasiHistory')) || [];
+        let achievement = JSON.parse(localStorage.getItem('achievement')) || {
+            streak: 0,
+            lastDate: null,
+            weeklyTotal: 0,
+            achievements: []
+        };
+        let chartInstance = null;
+        let targetHarian = JSON.parse(localStorage.getItem('hidrasiSettings'))?.dailyTarget || 2000;
+
+        // Atur nilai awal target harian di input
+        document.getElementById('targetInput').value = targetHarian;
+
+        // Validasi target harian saat diubah
+        document.getElementById('targetInput').addEventListener('change', function() {
+            targetHarian = parseInt(this.value) || 2000;
+            if (targetHarian < 500 || targetHarian > 5000) {
+                alert('Target harian harus antara 500-5000 ml');
+                this.value = targetHarian = 2000;
+            }
+            const settings = JSON.parse(localStorage.getItem('hidrasiSettings')) || {};
+            settings.dailyTarget = targetHarian;
+            localStorage.setItem('hidrasiSettings', JSON.stringify(settings));
+            updateDisplay();
+        });
+
+        // FUNGSI UTAMA
+        function updateDisplay() {
+            const today = new Date().toLocaleDateString('id-ID');
+            const total = history.filter(entry => entry.date === today)
+                                .reduce((sum, entry) => sum + entry.amount, 0);
+            
+            document.getElementById('total').textContent = total;
+            renderHistory();
+            renderChart();
+            checkAchievements();
+            saveData();
+        }
+
+        function tambahAir() {
+            const jumlah = parseInt(document.getElementById('amount').value) || 0;
+            if (jumlah <= 0) {
+                alert('Masukkan jumlah air yang valid (lebih dari 0)!');
+                return;
+            }
+            addEntry(jumlah);
+        }
+
+        function kurangiAir() {
+            const jumlah = parseInt(document.getElementById('amount').value) || 0;
+            if (jumlah <= 0) {
+                alert('Masukkan jumlah air yang valid (lebih dari 0)!');
+                return;
+            }
+            const today = new Date().toLocaleDateString('id-ID');
+            const totalHariIni = history
+                .filter(entry => entry.date === today)
+                .reduce((sum, entry) => sum + entry.amount, 0);
+            if (totalHariIni - jumlah < 0) {
+                alert('Total air tidak boleh negatif!');
+                return;
+            }
+            addEntry(-jumlah);
+        }
+
+        function addEntry(jumlah) {
+            const today = new Date();
+            const entry = {
+                date: today.toLocaleDateString('id-ID'),
+                time: today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                amount: jumlah
+            };
+            history.push(entry);
+            updateDisplay();
+        }
+
+        function renderHistory() {
+            document.getElementById('history').innerHTML = history
+                .slice(-7)
+                .reverse()
+                .map(entry => `<li>${entry.date} ${entry.time} - ${entry.amount}ml</li>`)
+                .join('');
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            const labels = Array.from({length: 7}, (_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                return d.toLocaleDateString('id-ID', {weekday: 'short'});
+            }).reverse();
+
+            const data = labels.map(label => {
+                const date = new Date();
+                date.setDate(date.getDate() - (6 - labels.indexOf(label)));
+                return history.filter(entry => entry.date === date.toLocaleDateString('id-ID'))
+                            .reduce((sum, entry) => sum + entry.amount, 0);
+            });
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Konsumsi Air (ml)',
+                            data: data,
+                            backgroundColor: 'var(--primary)'
+                        },
+                        {
+                            label: 'Target Harian',
+                            data: Array(labels.length).fill(targetHarian),
+                            type: 'line',
+                            borderColor: 'var(--accent)',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: { 
+                            ticks: { color: 'var(--text)' },
+                            suggestedMax: targetHarian * 1.5
+                        },
+                        x: { ticks: { color: 'var(--text)' } }
+                    }
+                }
+            });
+        }
+
+        function checkAchievements() {
+            const today = new Date().toLocaleDateString('id-ID');
+            const todayTotal = parseInt(document.getElementById('total').textContent);
+            targetHarian = parseInt(document.getElementById('targetInput').value) || 2000;
+
+            // Update Streak
+            if (todayTotal >= targetHarian) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (achievement.lastDate === yesterday.toLocaleDateString('id-ID')) {
+                    achievement.streak++;
+                } else if (achievement.lastDate !== today) {
+                    achievement.streak = 1;
+                }
+                achievement.lastDate = today;
+            }
+
+            // Hitung Total Mingguan
+            const weeklyTotal = history
+                .filter(entry => {
+                    const entryDate = new Date(entry.date.split('/').reverse().join('-'));
+                    const today = new Date();
+                    const diffDays = Math.floor((today - entryDate) / (1000 * 60 * 60 * 24));
+                    return diffDays <= 7 && diffDays >= 0;
+                })
+                .reduce((sum, entry) => sum + entry.amount, 0);
+
+            achievement.weeklyTotal = weeklyTotal;
+
+            // Update UI
+            document.getElementById('dailyStreak').textContent = `🔥 Streak: ${achievement.streak} hari`;
+            document.getElementById('weeklyTotal').textContent = `📅 Mingguan: ${weeklyTotal}ml`;
+
+            // Achievement Messages
+            const achievementMessage = document.getElementById('achievementMessage');
+            achievementMessage.innerHTML = '';
+
+            if (todayTotal >= targetHarian) {
+                achievementMessage.innerHTML += '<div class="badge achievement-green">🎉 Target Harian Tercapai!</div>';
+            }
+            if (achievement.streak >= 3) {
+                achievementMessage.innerHTML += '<div class="badge achievement-gold">⚡ Streak 3 Hari!</div>';
+            }
+            if (weeklyTotal >= targetHarian * 5) {
+                achievementMessage.innerHTML += '<div class="badge achievement-red">🚀 Total Mingguan Luar Biasa!</div>';
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Yakin ingin menghapus semua riwayat?')) {
+                history = [];
+                achievement = {
+                    streak: 0,
+                    lastDate: null,
+                    weeklyTotal: 0,
+                    achievements: []
+                };
+                updateDisplay();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('hidrasiHistory', JSON.stringify(history));
+            localStorage.setItem('achievement', JSON.stringify(achievement));
+        }
+
+        // MUSIK & DARK MODE
+        const bgm = document.getElementById('celtic-bgm');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            isPlaying = !isPlaying;
+            isPlaying ? bgm.play() : bgm.pause();
+            document.getElementById('music-icon').textContent = isPlaying ? '🎶' : '🎵';
+        }
+
+        bgm.addEventListener('error', () => {
+            alert('Gagal memuat musik latar. Pastikan file celtic-music.mp3 tersedia.');
+            document.getElementById('music-icon').textContent = '🎵';
+            isPlaying = false;
+        });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            document.getElementById('darkModeIcon').textContent = isDark ? '🌞' : '🌓';
+            renderChart(); // Perbarui grafik saat tema berubah
+        }
+
+        // INISIALISASI
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('darkModeIcon').textContent = '🌞';
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>

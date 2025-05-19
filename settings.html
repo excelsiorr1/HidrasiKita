@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HidrasiKita - Pengaturan Profil 💧</title>
+    <style>
+        :root {
+            --background: #CAF0F8;
+            --text: #2A5265;
+            --primary: #00B4D8;
+            --secondary: #90E0EF;
+            --card-bg: white;
+            --accent: #e63946;
+        }
+
+        .dark-mode {
+            --background: #1a2a3a;
+            --text: #CAF0F8;
+            --primary: #48BFE3;
+            --secondary: #2A5265;
+            --card-bg: #2A5265;
+            --accent: #ff6b6b;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--background);
+            color: var(--text);
+            transition: all 0.3s;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        input,
+        select {
+            padding: 8px;
+            border: 2px solid var(--primary);
+            border-radius: 5px;
+            background: var(--card-bg);
+            color: var(--text);
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .celtic-logo {
+            width: 80px;
+            display: block;
+            margin: 0 auto 20px;
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--secondary);
+        }
+
+        .setting-group h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .setting-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .setting-label {
+            flex: 0 0 150px;
+            margin-right: 10px;
+        }
+
+        .setting-input {
+            flex: 1;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .avatar-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .avatar-option {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .avatar-option:hover, .avatar-option.selected {
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .avatar-options img {
+            display: block;
+            object-fit: cover;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: all 0.4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: all 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+    </style>
+</head>
+<body>
+    <svg class="celtic-logo" viewBox="0 0 100 100">
+        <path d="M50 15 C20 15,15 50,50 85 C85 85,85 50,50 15" 
+              fill="none" stroke="var(--primary)" stroke-width="4"/>
+        <path d="M50 30 Q55 35,60 40 Q50 60,40 40 Q45 35,50 30" 
+              fill="var(--secondary)"/>
+    </svg>
+
+    <div class="container">
+        <h1>⚙️ Pengaturan Profil</h1>
+
+        <div class="setting-group">
+            <h3>👤 Profil</h3>
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                <div style="margin-right: 20px; text-align: center;">
+                    <img src="avatar-placeholder.jpg" class="avatar" id="current-avatar">
+                    <button id="change-avatar-btn">Ganti Avatar</button>
+                </div>
+                <div>
+                    <div class="setting-row">
+                        <div class="setting-label">Nama:</div>
+                        <div class="setting-input">
+                            <input type="text" id="user-name" placeholder="Masukkan nama Anda">
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label">Berat Badan (kg):</div>
+                        <div class="setting-input">
+                            <input type="number" id="user-weight" min="30" max="200" value="65">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="avatar-selector" style="display: none;">
+                <h4>Pilih Avatar:</h4>
+                <div class="avatar-options"></div>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <h3>🎯 Target Hidrasi</h3>
+            <div class="setting-row">
+                <div class="setting-label">Target Harian (ml):</div>
+                <div class="setting-input">
+                    <input type="number" id="daily-target" min="500" max="5000" value="2000">
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">Hitung otomatis:</div>
+                <div class="setting-input">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto-calculate">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <small style="display: block; margin-top: 5px;">Menghitung target berdasarkan berat badan (30ml/kg)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <h3>⏰ Pengingat</h3>
+            <div class="setting-row">
+                <div class="setting-label">Aktifkan pengingat:</div>
+                <div class="setting-input">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="enable-reminders">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="setting-row" id="reminder-frequency-container">
+                <div class="setting-label">Frekuensi:</div>
+                <div class="setting-input">
+                    <select id="reminder-frequency">
+                        <option value="30">Setiap 30 menit</option>
+                        <option value="60" selected>Setiap 1 jam</option>
+                        <option value="120">Setiap 2 jam</option>
+                        <option value="180">Setiap 3 jam</option>
+                    </select>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">Awal pengingat:</div>
+                <div class="setting-input">
+                    <input type="time" id="reminder-start" value="08:00">
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">Akhir pengingat:</div>
+                <div class="setting-input">
+                    <input type="time" id="reminder-end" value="22:00">
+                </div>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <h3>🌈 Tampilan</h3>
+            <div class="setting-row">
+                <div class="setting-label">Mode Gelap:</div>
+                <div class="setting-input">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">Suara notifikasi:</div>
+                <div class="setting-input">
+                    <select id="notification-sound">
+                        <option value="droplet">Tetes Air</option>
+                        <option value="bell">Lonceng</option>
+                        <option value="celtic" selected>Musik Celtic</option>
+                        <option value="none">Tidak Ada</option>
+                    </select>
+                    <button id="test-sound-btn" style="margin-top: 5px;">Test Suara</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <h3>📱 Lainnya</h3>
+            <div class="setting-row">
+                <div class="setting-label">Bahasa:</div>
+                <div class="setting-input">
+                    <select id="language-select">
+                        <option value="id" selected>Bahasa Indonesia</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">Ekspor data:</div>
+                <div class="setting-input">
+                    <button id="export-data-btn">Ekspor ke CSV</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">Hapus semua data:</div>
+                <div class="setting-input">
+                    <button id="clear-data-btn" style="background-color: var(--accent);">Reset Data</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button onclick="window.location.href='index.html'" style="background-color: #666;">Kembali</button>
+            <button id="save-settings-btn">Simpan Pengaturan</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+
+            document.getElementById('auto-calculate').addEventListener('change', function () {
+                const dailyTarget = document.getElementById('daily-target');
+                const userWeight = document.getElementById('user-weight');
+                if (this.checked) {
+                    dailyTarget.disabled = true;
+                    dailyTarget.value = Math.round(userWeight.value * 30);
+                } else {
+                    dailyTarget.disabled = false;
+                }
+            });
+
+            document.getElementById('user-weight').addEventListener('change', function () {
+                const autoCalculate = document.getElementById('auto-calculate');
+                if (autoCalculate.checked) {
+                    document.getElementById('daily-target').value = Math.round(this.value * 30);
+                }
+            });
+
+            document.getElementById('enable-reminders').addEventListener('change', function () {
+                const freqContainer = document.getElementById('reminder-frequency-container');
+                freqContainer.style.opacity = this.checked ? '1' : '0.5';
+                document.getElementById('reminder-frequency').disabled = !this.checked;
+            });
+
+            document.getElementById('dark-mode-toggle').addEventListener('change', function () {
+                document.body.classList.toggle('dark-mode', this.checked);
+            });
+
+            document.getElementById('change-avatar-btn').addEventListener('click', function () {
+                const avatarSelector = document.getElementById('avatar-selector');
+                avatarSelector.style.display = avatarSelector.style.display === 'none' ? 'block' : 'none';
+
+                if (avatarSelector.style.display === 'block' && avatarSelector.children.length <= 1) {
+                    const avatarOptions = ['avatar1.jpg', 'avatar2.jpg', 'avatar3.jpg', 'avatar4.jpg', 'avatar5.jpg', 'avatar6.jpg'];
+                    const container = document.querySelector('.avatar-options');
+
+                    avatarOptions.forEach((avatar, index) => {
+                        const img = document.createElement('img');
+                        img.src = avatar;
+                        img.className = 'avatar-option';
+                        img.dataset.avatar = avatar;
+                        img.addEventListener('click', function () {
+                            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+                            this.classList.add('selected');
+                            document.getElementById('current-avatar').src = this.dataset.avatar;
+                        });
+                        container.appendChild(img);
+                    });
+                }
+            });
+
+            document.getElementById('test-sound-btn').addEventListener('click', function () {
+                const sound = document.getElementById('notification-sound').value;
+                const audio = new Audio(`assets/sounds/${sound}.mp3`);
+                audio.play().catch(() => alert('Gagal memutar suara notifikasi'));
+            });
+
+            document.getElementById('save-settings-btn').addEventListener('click', () => {
+                saveSettings();
+            });
+
+            document.getElementById('export-data-btn').addEventListener('click', () => {
+                exportData();
+            });
+
+            document.getElementById('clear-data-btn').addEventListener('click', () => {
+                if (confirm('Anda yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan.')) {
+                    localStorage.clear();
+                    alert('Semua data telah dihapus. Aplikasi akan dimuat ulang.');
+                    window.location.reload();
+                }
+            });
+        });
+
+        function loadSettings() {
+            let settings = {};
+            try {
+                settings = JSON.parse(localStorage.getItem('hidrasiSettings')) || {};
+            } catch (e) {
+                console.error('Gagal load pengaturan:', e);
+            }
+
+            document.getElementById('user-name').value = settings.userName || '';
+            document.getElementById('user-weight').value = settings.userWeight || 65;
+            document.getElementById('daily-target').value = settings.dailyTarget || 2000;
+            document.getElementById('auto-calculate').checked = settings.autoCalculate || false;
+            document.getElementById('daily-target').disabled = settings.autoCalculate || false;
+            document.getElementById('enable-reminders').checked = settings.enableReminders || false;
+            document.getElementById('reminder-frequency-container').style.opacity = settings.enableReminders ? '1' : '0.5';
+            document.getElementById('reminder-frequency').disabled = !settings.enableReminders;
+            document.getElementById('reminder-frequency').value = settings.reminderFrequency || '60';
+            document.getElementById('reminder-start').value = settings.reminderStart || '08:00';
+            document.getElementById('reminder-end').value = settings.reminderEnd || '22:00';
+            document.getElementById('dark-mode-toggle').checked = settings.darkMode || false;
+            document.getElementById('notification-sound').value = settings.notificationSound || 'celtic';
+            document.getElementById('language-select').value = settings.language || 'id';
+            if (settings.avatar) document.getElementById('current-avatar').src = settings.avatar;
+            document.body.classList.toggle('dark-mode', settings.darkMode);
+        }
+
+        function saveSettings() {
+            const dailyTarget = parseInt(document.getElementById('daily-target').value) || 2000;
+            if (dailyTarget < 500 || dailyTarget > 5000) {
+                alert('Target harian harus antara 500-5000 ml');
+                return;
+            }
+
+            const settings = {
+                userName: document.getElementById('user-name').value,
+                userWeight: parseInt(document.getElementById('user-weight').value) || 65,
+                dailyTarget: dailyTarget,
+                autoCalculate: document.getElementById('auto-calculate').checked,
+                enableReminders: document.getElementById('enable-reminders').checked,
+                reminderFrequency: document.getElementById('reminder-frequency').value,
+                reminderStart: document.getElementById('reminder-start').value,
+                reminderEnd: document.getElementById('reminder-end').value,
+                darkMode: document.getElementById('dark-mode-toggle').checked,
+                notificationSound: document.getElementById('notification-sound').value,
+                language: document.getElementById('language-select').value,
+                avatar: document.getElementById('current-avatar').src
+            };
+
+            localStorage.setItem('hidrasiSettings', JSON.stringify(settings));
+            document.body.classList.toggle('dark-mode', settings.darkMode);
+            alert('Pengaturan berhasil disimpan!');
+        }
+
+        function exportData() {
+            const history = JSON.parse(localStorage.getItem('hidrasiHistory')) || [];
+            let csv = 'Tanggal,Waktu,Jumlah (ml)\n';
+            history.forEach(entry => {
+                csv += `${entry.date},${entry.time},${entry.amount}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'hidrasi-data.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
